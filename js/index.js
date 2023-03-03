@@ -56,6 +56,10 @@ const displaycard = cards => {
     })
 }
 
+document.getElementById('btn-see-more').addEventListener('click', function(){
+   console.log('btn work');
+
+} )
 
 
 loadData();
