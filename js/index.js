@@ -3,19 +3,49 @@ const loadData = () => {
     console.log(url)
     fetch(url)
         .then((res) => res.json())
-        .then((data) => displaycard(data.data.tools));
+        .then((data) => displaycard(data.data.tools.slice(0,6)));
 
 };
 
+
+// --------------- sort---------------------
+
+ const sortToolsByDate = (tools) => {
+  tools.sort((a, b) => new Date(b.published_in) - new Date(a.published_in));
+}
+
 const displaycard = (cards) => {
     const cardsContainer = document.getElementById('card-container');
+    
+// ------------------------------------------------------- 
+    // cards = cards.slice(0, 6);
+
+    cardsContainer.innerText = '';
+    // Button Sort
+    document.getElementById('sort-by-date').addEventListener('click', function(){
+      sortToolsByDate(cards);
+      displaycard(cards);
+    });
+    // button sort end//
 
 
-    cards = cards.slice(0, 6);
+
+  const showMoreBtn = document.getElementById('show-details')
+
+  if (cards.length <= 6) {
+    
+    showMoreBtn.classList.remove('d-none')
+  }
+  else {
+    showMoreBtn.classList.add('d-none')
+
+  }
 
 
-
+     
+// ----------------------------------------------------------
     cards.forEach(card => {
+      console.log(card);
         const cardDiv = document.createElement('div');
         cardDiv.classList.add('col');
         cardDiv.innerHTML = ` 
@@ -60,12 +90,42 @@ const displaycard = (cards) => {
     </div>
 `;
         cardsContainer.appendChild(cardDiv);
-    })
+    });
+
+    toggleSpinner(false);
 
 }
-loadData();
 
-// ------------------------------model-----------------------
+// -------------------------spinner---------------------
+
+const toggleSpinner = (isLoading) => {
+  const loaderSection = document.getElementById('spinner');
+  if (isLoading) {
+    loaderSection.classList.remove('d-none');
+  }
+  else {
+    loaderSection.classList.add('d-none')
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        // ------------------------------model-----------------------
 
 
 
@@ -111,9 +171,9 @@ const displayModal = (data) => {
   <div>
   <h1 class="fw-bold text-start px-3 ">features</h1>
   <div class="text-start px-4">
-  <li>${propertyValues[0].feature_name}</li>
-  <li>${propertyValues[1].feature_name}</li>
-  <li>${propertyValues[2].feature_name}</li>
+  <li>${propertyValues[0].feature_name ? propertyValues[0].feature_name : 'Not Available'}</li>
+  <li>${propertyValues[1].feature_name ? propertyValues[1].feature_name : 'Not Available'}</li>
+  <li>${propertyValues[2].feature_name ? propertyValues[2].feature_name : 'Not Available'}</li>
   </div>
   
   </div>
@@ -122,9 +182,9 @@ const displayModal = (data) => {
   <div class="px-3">
   <h1 class="fw-bold">integrations</h1>
   <ul class="text-start">
-  <li >${data.data.integrations[0]}</li>
-  <li >${data.data.integrations[1]}</li>
-  <li>${data.data.integrations[2]}</li>
+  <li >${data.data.integrations[0] ? data.data.integrations[0] : 'Not Available'}</li>
+  <li >${data.data.integrations[1] ? data.data.integrations[1] : 'Not Available'}</li>
+  <li>${data.data.integrations[2] ? data.data.integrations[2] : 'Not Available'}</li>
   </ul>
   
   </div>
@@ -133,11 +193,22 @@ const displayModal = (data) => {
   </div>
     <div class="col">
     <div id="right-side" class="card p-4 ">
-    <button class="btn btn-danger position-absolute top-10 end-0 mt-2 me-5">${data.data.accuracy.score ? data.data.accuracy.score * 100 : ''}% accuracy</button>
+    <button class="btn btn-danger position-absolute top-10 end-0 mt-2 me-5">${data.data.accuracy.score ===0? 'none' : 'block'?  data.data.accuracy.score * 100 : ''}% accuracy</button>
     <img src="${data.data.image_link[0]}" class="card-img-top" alt="...">
     <div class="card-body">
-      <h5 class="card-title mt-4 fw-bold">${data.data.input_output_examples[0].input}</h5>
-      <p class="card-text mt-4">${data.data.input_output_examples[0].output}</p>
+    ${
+      data.data?.input_output_examples
+        ? `<h4>${data.data?.input_output_examples[0]?.input}</h4>`
+        : "Can you give any example?"
+    }
+    <br>
+  
+    ${
+      data.data?.input_output_examples
+        ? `${data.data?.input_output_examples[0]?.output}`
+        : "No! Not Yet! Take a break!!!"
+    }
+    
       
   </div>
   </div>
@@ -157,6 +228,23 @@ const displayModal = (data) => {
 }
 
 
+// -------------------------------------- See More Button -------------------------
 
+const btnShow = ()=>{
+  toggleSpinner(true);
+  
+  fetch(`https://openapi.programming-hero.com/api/ai/tools`)
+  .then((res) => res.json())
+  .then((data) => displaycard(data.data.tools))
+  // const showBtn = document.getElementById('btn-show')
+  // showBtn.innerHTML = '';
+}
 
+document.getElementById('btn-see-more').addEventListener('click', function (){
+ 
+  btnShow();
+  
 
+})
+
+loadData();
